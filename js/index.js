@@ -16,14 +16,17 @@ function getItem(index){
 
 function getItemsHtml(items) {
   return items.map((item, index)=>{
-    return `<div>
-              <img class="item-list" data-index="${index}" src="${item[0].image_uri}" alt="Image of ${item[0].name["name-USen"]}">
-            </div>`
+    return `<li class="item-library__item">
+              <div class="item-library__item-image">
+                <img src="${item[0].image_uri}" alt="Image of ${item[0].name["name-USen"]}" data-index="${index}">
+              </div>
+              <p class="item-library__item-name">${item[0].name["name-USen"]}</p>
+            </li>`
   }).join("")
 }
 
 function setCurrentItems(){
-  currentPageData = itemLibraryData.slice(pageIndex * 10, (pageIndex + 1) * 10)
+  currentPageData = itemLibraryData.slice(pageIndex * 18, (pageIndex + 1) * 18)
 }
 
 function loadPage() {
@@ -43,10 +46,10 @@ async function renderItems(items) {
   itemLibrary.innerHTML = await getItemsHtml(items)
 
   setTimeout(()=>{
-    document.getElementById("item-library").style.display = "block"
+    document.getElementById("item-library").style.display = "grid"
     setTimeout(()=>{
       document.getElementById("item-library").style.opacity = "100%"
-    }, 500)
+    }, 1)
   }, 1000)
 
   const itemElements = document.querySelectorAll(".item-list")
