@@ -1,41 +1,62 @@
 const itemLibrary = document.getElementById("item-library")
-const itemLibraryData = getItems(); 
-let pageIndex = 0
+const itemLibraryData = await getItems()
 
-function loadPage() {
-  getItems()
-    .then((items) => renderItems(items))
-    .catch((e) => console.log(e))
-}
+let currentPageData = []
+let pageIndex = 0
 
 async function getItems() {
   const response = await fetch("http://acnhapi.com/v1a/houseware")
-  const data = await response.json()
-  return data.slice(pageIndex * 10, (pageIndex + 1) * 10)
+  const data = response.ok ? await response.json() : new Error('Something went wrong')
+  return data;
 }
 
-function getItemsHtml(item) {
-  return `<div>
-            <img src="${item[0].image_uri}" alt="Image of ${item[0].name["name-USen"]}">
-          </div>`
+function getItem(index){
+  return currentPageData[index]
+}
+
+function getItemsHtml(items) {
+  return items.map((item, index)=>{
+    return `<div>
+              <img class="item-list" data-index="${index}" src="${item[0].image_uri}" alt="Image of ${item[0].name["name-USen"]}">
+            </div>`
+  }).join("")
+}
+
+function setCurrentItems(){
+  currentPageData = itemLibraryData.slice(pageIndex * 10, (pageIndex + 1) * 10)
+}
+
+function loadPage() {
+  setCurrentItems()
+  renderItems(currentPageData)
 }
 
 function changeIndex() {
-    pageIndex++
-    loadPage()
+  pageIndex++
+  loadPage()
 }
 
 async function renderItems(items) {
-  itemLibrary.innerHTML = items.map(getItemsHtml).join("")
+  document.getElementById("item-library").style.opacity = "0%"
+  document.getElementById("item-library").style.display = "none"
+
+  itemLibrary.innerHTML = await getItemsHtml(items)
+
+  setTimeout(()=>{
+    document.getElementById("item-library").style.display = "block"
+    setTimeout(()=>{
+      document.getElementById("item-library").style.opacity = "100%"
+    }, 500)
+  }, 1000)
+
+  const itemElements = document.querySelectorAll(".item-list")
+  itemElements.forEach(itemEl=>{
+    itemEl.addEventListener("click", (item)=>{
+      getItem(item.currentTarget.dataset.index)
+    })
+  })
 }
 
 loadPage()
-// function getItemsHtml(item) {
-//     return item.map((type) => {
-//     return `<div>
-//                 <img src="${type.image_url}" alt="Image of ">
-//             </div>`;
-//     });
-// }
 
 document.getElementById("next-page").addEventListener("click", changeIndex);
